@@ -1,25 +1,21 @@
-//please bisa please
-
-#include<iostream>
-#include<stdlib.h>
-#include<cmath>
+#include <iostream>
+#include <cmath>
 using namespace std;
 
-//calculator.h
-class Calculator{
+class Calculator {
 public:
-	double evaluate(string problem);					
-	double operate(double num1, double num2, char op);	
-	double trig(double num1, int n);	
-	int precedence(char op);			
+    double evaluate(string problem);
+    double operate(double num1, double num2, char op);
+    double trig(double num1, int n);
+    int precedence(char op);
 };
 
-//queue.h
 class Queue {
 private:
-	int front, rear, size;
-	double* array;
-public :
+    int front, rear, size;
+    double* array;
+
+public:
     Queue(int size);
     ~Queue();
     bool IsFull();
@@ -31,118 +27,80 @@ public :
     double getRear();
 };
 
-//queue.cpp
 Queue::Queue(int size) {
-    this->front = 0;
-    this->rear = 0;
+    front = rear = 0;
     this->size = size;
-    this->array = new double[size];
-    
-    if (array == NULL){
-    	cout << "Error" << endl;
-    	exit(EXIT_FAILURE);
-	}
+    array = new double[size];
+    if (array == nullptr) {
+        cout << "Error" << endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
-//delete the queue
 Queue::~Queue() {
-    delete[] this->array;
+    delete[] array;
 }
 
-//checking if is full
 bool Queue::IsFull() {
-	//full if size equal to rear
-    return (this->size == this->rear);
+    return (size == rear);
 }
 
-//checking if is empty
-bool Queue::IsEmpty(){
-	//empty if the front equal to rear
-    return (this->front == this->rear);
+bool Queue::IsEmpty() {
+    return (front == rear);
 }
 
-//push the num values
 void Queue::Enqueue(double K) {
-	
-	//check if full
     if (IsFull()) {
         cout << "\n\tOverflow" << endl;
         return;
     }
-    else {
-        this->array[this->rear] = K; //put inside the array
-        this->rear = this->rear + 1; //increase the rear
-    }
-    return;
+    array[rear] = K;
+    rear++;
 }
 
-//push the char values
 void Queue::characterEnqueue(char C) {
-	
-	//check if full
     if (IsFull()) {
         cout << "\n\tOverflow" << endl;
         return;
     }
-    else {
-        this->array[this->rear] = C; //put inside the array
-        this->rear = this->rear + 1; //increase the rear
-    }
-    return;
+    array[rear] = C;
+    rear++;
 }
 
-//Queue is First in First out
-//But for the purpose of the calculator
-//We make the queue to Last in First out
-void Queue::Dequeue(){
-	
-	//check if empty
-    if (IsEmpty()){
+void Queue::Dequeue() {
+    if (IsEmpty()) {
         cout << "\n\tUnderflow" << endl;
         return;
     }
-    
-    //dequeue with rear-1
-    else {
-        this->rear = this->rear - 1;
-    }
-    return;
+    rear--;
 }
 
-//getting the front
-//never used it
-double Queue::getFront(){
-    if (IsEmpty()){
+double Queue::getFront() {
+    if (IsEmpty()) {
         cout << "\n\tUnderflow" << endl;
     }
-	return this->array[this->front];
+    return array[front];
 }
 
-//getting the rear
-double Queue::getRear(){
-    if (IsEmpty()){
+double Queue::getRear() {
+    if (IsEmpty()) {
         cout << "\n\tUnderflow" << endl;
     }
-	return this->array[this->rear - 1];
+    return array[rear - 1];
 }
 
-//eval
+double Calculator::evaluate(string problem) {
+    int i;
+    double pi = 3.141592;
+    Queue values(100);
+    Queue ops(100);
 
-double Calculator::evaluate(string problem){
-	int i;
-	double pi = 3.141592;		
-	Queue values(100);	
-	Queue ops(100);	
-	
-	//Loop to check entire problem
-	for (i=0; i < problem.length(); i++){
-		
-		//ignore the blanks
-		if (problem[i] == ' '){
-			continue;
-		}
-		
-		//push open bracket to the ops queue
+    for (i = 0; i < problem.length(); i++) {
+        if (problem[i] == ' ') {
+            continue;
+        }
+        // Rest of your code for parsing and evaluating expressions...
+        //push open bracket to the ops queue
 		else if (problem[i] == '('){
 			ops.characterEnqueue(problem[i]);
 		}
@@ -391,77 +349,69 @@ double Calculator::evaluate(string problem){
 			//if the precendance smaller, push the operator to queue
 			ops.characterEnqueue(problem[i]);
 		}
-	}
-	
-	//after arranging the problem, evaluate
-	while(!ops.IsEmpty()){
-		double val1 = values.getRear();
-		values.Dequeue();
-		
-		double val2 = values.getRear();
-		values.Dequeue();
-		
-		char op = ops.getRear();
-		ops.Dequeue();
-		
-		values.Enqueue(operate(val1, val2, op));
-	}
-	
-	//final result stored in queue
-	return values.getRear();
+    }
+
+    while (!ops.IsEmpty()) {
+        double val1 = values.getRear();
+        values.Dequeue();
+        double val2 = values.getRear();
+        values.Dequeue();
+        char op = ops.getRear();
+        ops.Dequeue();
+        values.Enqueue(operate(val1, val2, op));
+    }
+
+    return values.getRear();
 }
 
-//operation
-double Calculator::operate(double num1, double num2, char op){
-	switch(op){
-		case '+' : return num2 + num1;
-		case '-' : return num2 - num1;
-		case '*' : return num2 * num1;
-		case '/' : return num2 / num1;
-		case '^' : return pow(num2, num1);
-	}
+double Calculator::operate(double num1, double num2, char op) {
+    switch (op) {
+        case '+': return num2 + num1;
+        case '-': return num2 - num1;
+        case '*': return num2 * num1;
+        case '/': return num2 / num1;
+        case '^': return pow(num2, num1);
+        default: return 0; // Handle unsupported operators here
+    }
 }
 
-//precedence
-int Calculator::precedence(char op){
-	if (op == '+' || op == '-'){
-		return 1;
-	}
-	if (op == '*' || op == '/'){
-		return 2;
-	}
-	if (op == '^'){
-		return 3;
-	}
-	else {
-		return 0;
-	}
+int Calculator::precedence(char op) {
+    if (op == '+' || op == '-') {
+        return 1;
+    }
+    if (op == '*' || op == '/') {
+        return 2;
+    }
+    if (op == '^') {
+        return 3;
+    }
+    return 0;
 }
 
-//trig
-double Calculator::trig(double num1, int n){
-	switch(n){
-		case 1: return sin(num1);
-		case 2: return cos(num1);
-		case 3: return tan(num1);
-		case 4: return asin(num1);
-		case 5: return acos(num1);
-		case 6: return atan(num1);
-		case 7: return log10(num1);
-		case 8: return log(num1);
-	}
+double Calculator::trig(double num1, int n) {
+    switch (n) {
+        case 1: return sin(num1);
+        case 2: return cos(num1);
+        case 3: return tan(num1);
+        case 4: return asin(num1);
+        case 5: return acos(num1);
+        case 6: return atan(num1);
+        case 7: return log10(num1);
+        case 8: return log(num1);
+        default: return 0; // Handle unsupported trig functions here
+    }
 }
 
-//MAIN
 int main() {
-    Calculator calculator;	
-	double history[100] = {0};	
-    string problem;			
-	double result;		
-	int ch = 1;						    
-	int key=0;						    
-	
-	//welcome page
+    Calculator calculator;
+    double history[100] = { 0 };
+    string problem;
+    double result;
+    int ch = 1;
+    int key = 0;
+
+    // Your welcome message and program flow here...
+    //welcome page
 	cout << "======= Scientific Calculator =======\n" << endl;
 	cout << "Input requirements: " << endl;
 	cout << "1. addition -> a + b\n2. subtraction -> a - b\n3. multiplication -> a * b\n4. division -> a/b\n"
@@ -548,5 +498,6 @@ int main() {
 		        cout << "\n\n\n\n\n\nThank you for using this calculator, Goodbye!" << endl;
 			} else goto i;
 	}
-	return 0;
+
+    return 0;
 }
